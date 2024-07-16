@@ -13,5 +13,6 @@ class L2Message(GNO):
         self.message_size = message_payload + L2Message.header_size
         self.message_type = message_type
 
+
     def __copy__(self):
         return L2Message(self.src_mac, self.dst_mac, self.message_payload, self.message_type)
