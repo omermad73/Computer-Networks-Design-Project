@@ -1,6 +1,4 @@
 import queue
-import math
-import copy
 from Switch2 import SwitchLab2
 from L2Message import L2Message
 from Event import Event
@@ -18,6 +16,7 @@ class SwitchLab3(SwitchLab2):
         self.queues = self.configure_queues()
         # for Priority scheduling
         self.counters = [count() for _ in range(self.num_ports)]
+        self.dest_ports = []
 
     def configure_queues(self):
         if self.schedule_alg == 'FIFO':
@@ -25,14 +24,17 @@ class SwitchLab3(SwitchLab2):
         elif self.schedule_alg == 'Priority':
             return [[] for _ in range(self.num_ports)]
         else:
-            return [queue.Queue() for _ in range(self.num_ports)]       # TODO
+            return [queue.Queue() for _ in range(self.num_ports)]  # TODO: change it
 
     def push_priority(self, queue_num: int, message: L2Message):
         heapq.heappush(self.queues[queue_num], (message.src_mac, next(self.counters[queue_num]), message))
 
     def pop_priority(self, queue_num):
         if self.queues[queue_num]:
-            return heapq.heappop(self.queues[queue_num])
+            heapq.heappop(self.queues[queue_num])
+            if not self.queues[queue_num]:
+                return None
+            return self.queues[queue_num][0]
         else:
             return None
 
@@ -44,7 +46,8 @@ class SwitchLab3(SwitchLab2):
         if dest_port is None:
             # If the destination port is not found, flood the message, but we disable flooding in Lab 3
             # We will send the message to the next port in the list
-            dest_port = (port + 1) % self.num_ports
+            random_entry = random.randrange(len(self.dest_ports))
+            dest_port = self.link_to_port(self.dest_ports[random_entry])
 
         if self.ports[dest_port] is not None and port != dest_port:
             if self.schedule_alg == 'FIFO':
@@ -67,29 +70,6 @@ class SwitchLab3(SwitchLab2):
         if self.port_is_blocked[dest_port] is False:
             # If the port is not blocked, the switch will send the message
             self.first_message_output(timeline, dest_port, all_l2messages, printing_flag)
-
-    def first_message_output(self, timeline, queue_num, all_l2messages, printing_flag): # TODO: no change
-        current_time = timeline.events[0].scheduled_time
-        # receive the message to send
-        next_message = self.queues[queue_num].queue[0]
-        #  update the HoL time
-        self.totalHoLTime += self.queue_to_HoLTime[queue_num]
-        self.queue_to_HoLTime[queue_num] = 0
-        if next_message is None:
-            return
-
-        dest_port = queue_num
-        link = self.ports[queue_num]
-        time = current_time + link.transmit_delay(next_message)  # calculation of arrival time
-        # = time of sending
-        self.port_is_blocked[queue_num] = True
-        event = Event(time, "transmitted", self.id, None, None, queue_num)
-
-        timeline.add_event(event)
-        if printing_flag == 1:
-            print(f"Switch: {self.id} \033[36msending\033[0m the message (size: {next_message.message_size}) to"
-                  f" port {dest_port} at time: {current_time:.6f}")
-        self.send_message(timeline, dest_port, next_message, all_l2messages)
 
     def message_transmitted_fifo(self, timeline, queue_num, all_l2messages, printing_flag):
         current_time = timeline.events[0].scheduled_time
@@ -115,12 +95,12 @@ class SwitchLab3(SwitchLab2):
         self.push_priority(dest_port, l2_message)
         if self.port_is_blocked[dest_port] is False:
             # If the port is not blocked, the switch will send the message
-            self.first_message_output(timeline, dest_port, all_l2messages, printing_flag)
+            self.first_message_priority(timeline, dest_port, all_l2messages, printing_flag)
 
     def first_message_priority(self, timeline, queue_num, all_l2messages, printing_flag):
         current_time = timeline.events[0].scheduled_time
         # receive the message to send
-        next_message = self.queues[queue_num][0]
+        next_message = self.queues[queue_num][0][2]
         if next_message is None:
             return
 
@@ -133,8 +113,8 @@ class SwitchLab3(SwitchLab2):
 
         timeline.add_event(event)
         if printing_flag == 1:
-            print(f"Switch: {self.id} \033[36msending\033[0m the message (size: {next_message.message_size}) to"
-                  f" port {dest_port} at time: {current_time:.6f}")
+            print(f"Switch: {self.id} \033[36msending\033[0m the message (size: {next_message.message_size}) "
+                  f"from {next_message.src_mac} to port {dest_port} at time: {current_time:.6f}")
         self.send_message(timeline, dest_port, next_message, all_l2messages)
 
     def message_transmitted_priority(self, timeline, queue_num, all_l2messages, printing_flag):
@@ -144,6 +124,7 @@ class SwitchLab3(SwitchLab2):
         next_message = self.pop_priority(queue_num)
         if next_message is None:
             return
+        next_message = next_message[2]
 
         dest_port = queue_num
         link = self.ports[dest_port]
@@ -153,8 +134,8 @@ class SwitchLab3(SwitchLab2):
         event = Event(time, "transmitted", self.id, None, None, dest_port)
         timeline.add_event(event)
         if printing_flag == 1:
-            print(f"Switch: {self.id} \033[36msending\033[0m the message (size: {next_message.message_size}) to"
-                  f" port {dest_port} at time: {current_time:.6f}")
+            print(f"Switch: {self.id} \033[36msending\033[0m the message (size: {next_message.message_size}) "
+                  f"from {next_message.src_mac} to port {dest_port} at time: {current_time:.6f}")
         self.send_message(timeline, dest_port, next_message, all_l2messages)
 
     def handle_massage_pgps(self, timeline, dest_port, l2_message, all_l2messages, printing_flag):

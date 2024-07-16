@@ -14,7 +14,7 @@ class PartA:
     @staticmethod
     def main():
         # simulation settings
-        number_of_packets = 10
+        number_of_packets = 3
         lambda_param = 0.5
         min_payload_size = 64
         max_payload_size = 1522
@@ -31,17 +31,17 @@ class PartA:
 
         # topology configuration
         different_timeline = Timeline()
-        num_source_hosts = random.randint(1, 6)
-        num_dest_hosts = 2
-        port_num_s0 = 16
+        num_source_hosts = 3  # random.randint(1, 6)
+        num_dest_hosts = 1  # 2
+        port_num_s0 = 4
 
-        tx_rate = 10
+        tx_rate = 1e6
         propagation = 0
 
         # switch 2 configuration
 
-        scheduling_discipline = "FIFO"
-        #scheduling_discipline = "Priority"
+        #scheduling_discipline = "FIFO"
+        scheduling_discipline = "Priority"
         #scheduling_discipline = "PGPS"
 
         is_fluid = False
@@ -63,7 +63,6 @@ class PartA:
         links = []
         switch_links = []
         for host in source_hosts:
-
             link = Link(host, switch, tx_rate, propagation)
             links.append(link)
             switch_links.append(link)
@@ -71,6 +70,7 @@ class PartA:
             link = Link(host, switch, tx_rate, propagation)
             links.append(link)
             switch_links.append(link)
+            switch.dest_ports.append(link.id)
 
         switch.connect_all_ports(switch_links)
         switches = [switch]

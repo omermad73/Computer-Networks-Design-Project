@@ -83,7 +83,7 @@ class SwitchLab2(Switch):
 
         if printing_flag == 1:
             print(f"Switch: {self.id} \033[34mreceived\033[0m a message (size: {l2_message.message_size}) from port"
-                  f" {port} at time: {current_time:.6f}, MAC table updated")
+                  f" {l2_message.src_mac} at time: {current_time:.6f}, MAC table updated")
             print(f"Source MAC: {src_mac} Destination MAC: {dst_mac}")
         self.update_mac_table(src_mac, port, current_time, printing_flag)
 
