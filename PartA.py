@@ -13,10 +13,10 @@ class PartA:
     @staticmethod
     def main():
         # simulation settings
-        number_of_packets = 2
+        number_of_packets = 20
         lambda_param = 0.5
-        min_payload_size = 10
-        max_payload_size = 20
+        min_payload_size = 100
+        max_payload_size = 200
         printing_flag = 1
         terminate = 100000  # [sec] after this time the simulation is eliminated
         file_name = "macTableLog.txt"
@@ -35,14 +35,14 @@ class PartA:
         num_dest_hosts = 2
         port_num_s0 = 16
 
-        tx_rate = 10
+        tx_rate = 100
         propagation = 1
 
         # switch 2 configuration
 
         q_type = "input"
         q_type = "output"
-        q_type = "virtual_output"
+        #q_type = "virtual_output"
 
         is_fluid = False
         schedule_alg = 'FIFO'
@@ -140,8 +140,9 @@ class PartA:
             mac_table_log_file.close()
 
         #statsitcs:
-        if printing_flag == 1:
-            switch.print_statistics()
+        #if printing_flag == 1:
+            #switch.print_statistics()
+
 
         # Visualization
         SimulationFunctions.draw_topology(switches, source_hosts, links,dest_hosts)

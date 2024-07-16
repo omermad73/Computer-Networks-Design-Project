@@ -1,0 +1,177 @@
+import copy
+class Packet:
+    def __init__(self, packet_id, size, arrival_time, priority, flow_id):
+        self.packet_id = packet_id
+        self.size = size
+        self.arrival_time = arrival_time
+        self.priority = priority
+        self.start_time = None
+        self.end_time = None
+        self.flow_id = flow_id
+
+
+def FIFO_Schduling(packets, transmission_rate):
+    print("FIFO Scheduling:")
+    current_time = 0
+    packets.sort(key=lambda x: (x.arrival_time, -x.priority)) # Sort packets by arrival time first and if equal by priority
+    for packet in packets:
+        packet.start_time = max(current_time, packet.arrival_time)
+        packet.end_time = packet.start_time + packet.size / transmission_rate
+        current_time = packet.end_time
+        print(f'Packet {packet.packet_id}: Start time: {packet.start_time}, End time: {packet.end_time}')
+
+
+
+
+def Priority_Scheduling(packets, transmission_rate):
+    print("Priority Scheduling:")
+    packets.sort(key=lambda x: x.arrival_time)  # Sort packets by arrival time first
+    current_time = 0
+    ready_packets = []
+
+    while packets or ready_packets:
+        # Move packets that have arrived to the ready queue
+        while packets and packets[0].arrival_time <= current_time:
+            ready_packets.append(packets.pop(0))
+
+        if ready_packets:
+            # Sort ready packets by priority (higher priority first) and then by arrival time
+            ready_packets.sort(key=lambda x: (-x.priority, x.arrival_time))
+            packet = ready_packets.pop(0)
+            packet.start_time = max(current_time, packet.arrival_time)
+            packet.end_time = packet.start_time + packet.size / transmission_rate
+            current_time = packet.end_time
+            print(f'Packet {packet.packet_id}: Start time: {packet.start_time}, End time: {packet.end_time}')
+        else:
+            # If no ready packets, advance time to the next packet arrival
+            if packets:
+                current_time = packets[0].arrival_time
+
+
+
+
+def GPS_Scheduling(packets, transmission_rate, flg = 0):
+    if flg == 0:
+        print("GPS Scheduling:")
+    order_of_packets = []
+    current_time = 0
+    packets.sort(key=lambda x: x.arrival_time)  # Sort packets by arrival time first
+    not_ready_packets = []
+    for packet in packets: not_ready_packets.append(packet)
+    ready_packets = []
+    while not_ready_packets or ready_packets:
+        # While there is packet hasnt get fully serviced
+        for packets in not_ready_packets:
+            if packets.arrival_time <= current_time and packets.flow_id not in [packet.flow_id for packet in ready_packets]:
+                ready_packets.append(packets)
+                not_ready_packets.remove(packets)
+                #if there is a packet that has arrived and not in the ready queue, add it to the ready queue
+
+
+        if ready_packets:
+            rate = transmission_rate/sum(packet.priority for packet in ready_packets)   #find rate
+            time_min = min((packet.size / (rate * packet.priority) for packet in ready_packets),
+                           default=end_point)
+            #find the minimum time to service the packet
+
+            filtered_packets = [packet.arrival_time for packet in not_ready_packets if packet.flow_id not in [p.flow_id for p in ready_packets]]
+
+            lowest_arrival_time = min(filtered_packets) - current_time if filtered_packets else -1
+            if lowest_arrival_time != -1:
+                time_min = min (time_min, lowest_arrival_time)
+            #find the minimum time to the next packet arrival which is flow_id not in the ready queue
+
+
+            for packet in ready_packets:
+                packet.size = packet.size - rate * packet.priority * time_min
+            for packet in ready_packets:
+                if packet.size == 0:
+                    order_of_packets.append(packet.packet_id)
+                    ready_packets.remove(packet)
+                    packet.end_time = current_time + time_min
+                    if flg == 0:
+                        print(f'Packet {packet.packet_id} arrived at {packet.end_time}')
+            current_time = current_time + time_min
+    return order_of_packets
+
+
+def PGPS_Scheduling(packets, transmission_rate):
+    print("PGPS Scheduling:")
+    current_time = 0
+    packets.sort(key=lambda x: x.arrival_time)  # Sort packets by arrival time first
+    copy_packets = []
+    for packet in packets: copy_packets.append(copy.deepcopy(packet))
+    #making deep cppy of packets
+    list_arrived_GPS = GPS_Scheduling(packets, transmission_rate, 1)
+
+    mid_ready_packets = []
+
+
+    while copy_packets or mid_ready_packets:
+
+        for i in copy_packets:
+            if i.arrival_time <= current_time and i.packet_id not in mid_ready_packets:
+                mid_ready_packets.append(i.packet_id)
+
+        #list of packets that have been serviced by GPS
+
+        # While there is packet hasnt get fully serviced
+
+        first_finished_GPS = next((x for x in list_arrived_GPS if x in mid_ready_packets), None)
+        if first_finished_GPS:
+            id = first_finished_GPS
+            pack = find_pack(id, copy_packets)
+            current_time = current_time + pack.size/transmission_rate
+            print(f'Packet {pack.packet_id}: Start time: {current_time - pack.size/transmission_rate}, End time: {current_time}')
+            mid_ready_packets.remove(id)
+            copy_packets.remove(pack)
+
+
+
+
+        #if there is a packet that has arrived and not in the ready queue, add it to the ready queue
+
+def find_pack(id, packets):
+    for packet in packets:
+        if packet.packet_id == id:
+            return packet
+    return None
+
+
+
+
+
+packets = [
+    Packet(3, 0.6, 3, 1, 1),
+    Packet(4, 0.8, 7, 1, 1),
+    Packet(1, 5.6, 0, 2, 2),
+    Packet(2, 6, 1, 4, 3),
+    Packet(5, 3.8, 7, 4, 3)
+]
+total_packet_size = sum(packet.size for packet in packets)
+transmission_rate = 1.4
+end_point = total_packet_size * transmission_rate
+
+
+
+sch_case = "FIFO_Schduling"
+
+
+
+#match sch_case:
+  #  case "Priority_Scheduling":
+  #      Priority_Scheduling(packets, transmission_rate)
+  #  case "FIFO_Schduling":
+  #      FIFO_Schduling(packets, transmission_rate)
+# #   case "GPS_Scheduling":
+#GPS_Scheduling(packets, transmission_rate)
+  #  case "PGPS_Scheduling":
+PGPS_Scheduling(packets, transmission_rate)
+
+
+#FIFO_Schduling(packets, transmission_rate)
+#Priority_Scheduling(packets, transmission_rate)
+#Priority_Scheduling(packets, transmission_rate)
+#PGPS_Scheduling(packets, transmission_rate)
+#run = GPS_Scheduling(packets, transmission_rate, 0)
+
