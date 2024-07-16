@@ -142,8 +142,4 @@ class SwitchLab3(SwitchLab2):
                   f"from {next_message.src_mac} to port {dest_port} at time: {current_time:.6f}")
         self.send_message(timeline, dest_port, next_message, all_l2messages)
 
-    def handle_massage_pgps(self, timeline, dest_port, l2_message, all_l2messages, printing_flag):
-        pass
-
-    def message_transmitted_pgps(self, timeline, queue_num, all_l2messages, printing_flag):
-        pass
+ <Host2.Host2 object at 0x000002AC53B57CA0>
