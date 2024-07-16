@@ -29,9 +29,12 @@ class SwitchLab3(SwitchLab2):
     def push_priority(self, queue_num: int, message: L2Message):
         heapq.heappush(self.queues[queue_num], (message.src_mac, next(self.counters[queue_num]), message))
 
-    def pop_priority(self, queue_num):
+    def pop_priority(self, queue_num, transmitted_message_id):
         if self.queues[queue_num]:
-            heapq.heappop(self.queues[queue_num])
+            for i, message in enumerate(self.queues[queue_num]):
+                if message[2].id == transmitted_message_id:
+                    del self.queues[queue_num][i]
+            heapq.heapify(self.queues[queue_num])
             if not self.queues[queue_num]:
                 return None
             return self.queues[queue_num][0]
@@ -108,7 +111,7 @@ class SwitchLab3(SwitchLab2):
         link = self.ports[queue_num]
         time = current_time + link.transmit_delay(next_message)  # calculation of arrival time
         # = time of sending
-        self.port_is_blocked[queue_num] = True
+        self.port_is_blocked[queue_num] = next_message.id
         event = Event(time, "transmitted", self.id, None, None, queue_num)
 
         timeline.add_event(event)
@@ -120,8 +123,9 @@ class SwitchLab3(SwitchLab2):
     def message_transmitted_priority(self, timeline, queue_num, all_l2messages, printing_flag):
         current_time = timeline.events[0].scheduled_time
 
+        transmitted_message_id = self.port_is_blocked[queue_num]
+        next_message = self.pop_priority(queue_num, transmitted_message_id)
         self.port_is_blocked[queue_num] = False
-        next_message = self.pop_priority(queue_num)
         if next_message is None:
             return
         next_message = next_message[2]
@@ -130,7 +134,7 @@ class SwitchLab3(SwitchLab2):
         link = self.ports[dest_port]
         time = current_time + link.transmit_delay(next_message)  # calculation of arrival time
         # = time of sending
-        self.port_is_blocked[dest_port] = True
+        self.port_is_blocked[dest_port] = next_message.id
         event = Event(time, "transmitted", self.id, None, None, dest_port)
         timeline.add_event(event)
         if printing_flag == 1:
@@ -142,7 +146,4 @@ class SwitchLab3(SwitchLab2):
         pass
 
     def message_transmitted_pgps(self, timeline, queue_num, all_l2messages, printing_flag):
-        pass
-
-    def print_statistics(self):
         pass
