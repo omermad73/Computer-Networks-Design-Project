@@ -7,7 +7,8 @@ import random
 
 
 class SwitchLab2(Switch):
-    def __init__(self, num_ports, mac_table_size, q_type="input", is_fluid=False, schedule_alg='FIFO', log_file=None,seed=42, ttl=10):
+    def __init__(self, num_ports, mac_table_size, q_type="input", is_fluid=False, schedule_alg='FIFO', log_file=None,
+                 seed=42, ttl=10):
         super().__init__(num_ports, mac_table_size, log_file, ttl)
         if seed is not None:
             random.seed(seed)
@@ -91,7 +92,8 @@ class SwitchLab2(Switch):
         elif self.q_type == 'output':
             self.handle_message_output(l2_message, all_l2messages, timeline, current_time, link_id, printing_flag)
         elif self.q_type == 'virtual_output':
-            self.handle_message_virtual_output(l2_message, all_l2messages, timeline, current_time, link_id, printing_flag)
+            self.handle_message_virtual_output(l2_message, all_l2messages, timeline, current_time, link_id,
+                                               printing_flag)
 
     def handle_message_input(self, l2_message, all_l2messages, timeline, current_time, link_id, printing_flag):
         dst_mac = l2_message.dst_mac
@@ -111,7 +113,8 @@ class SwitchLab2(Switch):
     def try_send_message_input(self, all_l2messages, timeline, current_time, in_port, printing_flag):
         l2_message = self.queues[in_port].queue[0]
         for out_port in range(self.num_ports):
-            if self.flooding_tabel[in_port][out_port] is False or self.flooding_tabel[in_port][out_port] == "transmitting":  # The message should not be sent to this port
+            if self.flooding_tabel[in_port][out_port] is False or self.flooding_tabel[in_port][out_port]\
+                    == "transmitting":  # The message should not be sent to this port
                 continue
             if self.port_is_blocked[out_port] is True:  # The message should be sent to this port, but it is blocked
                 if self.queue_to_HoLTime[in_port] == 0:
@@ -157,7 +160,7 @@ class SwitchLab2(Switch):
                     self.enqueue(duplicated_message, out_port)
                     if self.port_is_blocked[out_port] is False:
                         # If the port is not blocked, the switch will send the message
-                            self.first_message_output(timeline, out_port, all_l2messages, printing_flag)
+                        self.first_message_output(timeline, out_port, all_l2messages, printing_flag)
 
     def handle_message_virtual_output(self, l2_message, all_l2messages, timeline, current_time, link_id, printing_flag):
         dst_mac = l2_message.dst_mac
@@ -408,7 +411,8 @@ class SwitchLab2(Switch):
 
     def is_finished_sending(self, in_port):
         for out_port in range(self.num_ports):
-            if self.flooding_tabel[in_port][out_port] is True or self.flooding_tabel[in_port][out_port] == "transmitting":
+            if self.flooding_tabel[in_port][out_port] is True or self.flooding_tabel[in_port][out_port] \
+                    == "transmitting":
                 return False
         return True
 

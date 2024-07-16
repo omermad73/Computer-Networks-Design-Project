@@ -9,22 +9,22 @@ from SimulationFunctions import SimulationFunctions
 from Switch import Switch
 from Switch2 import SwitchLab2
 
+
 class PartA:
     @staticmethod
     def main():
         # simulation settings
-        number_of_packets = 2
+        number_of_packets = 10
         lambda_param = 0.5
-        min_payload_size = 10
-        max_payload_size = 20
+        min_payload_size = 64
+        max_payload_size = 1522
         printing_flag = 1
         terminate = 100000  # [sec] after this time the simulation is eliminated
         file_name = "macTableLog.txt"
         mac_table_log_file = open(file_name, 'w')
         mac_table_log_file = None
 
-
-        #  confige the ranodm seed for the entire Toplgy
+        #  config the random seed for the entire Topology
         seed = 9
         random.seed(seed)
         SimulationFunctions.random_seed(seed)
@@ -36,13 +36,13 @@ class PartA:
         port_num_s0 = 16
 
         tx_rate = 10
-        propagation = 1
+        propagation = 0
 
         # switch 2 configuration
 
-        q_type = "input"
+        #q_type = "input"
         q_type = "output"
-        q_type = "virtual_output"
+        #q_type = "virtual_output"
 
         is_fluid = False
         schedule_alg = 'FIFO'
@@ -53,13 +53,13 @@ class PartA:
         # switch1 = Switch(port_num_s1, num_hosts0 + num_hosts1 - 2, mac_table_log_file)
         # Creating hosts
 
-        #creating dest hosts.
-        dest_hosts = SimulationFunctions.create_hosts2(0, num_dest_hosts,None,seed)
-        source_hosts = SimulationFunctions.create_hosts2(num_dest_hosts, num_source_hosts,None,seed)
+        # creating dest hosts.
+        dest_hosts = SimulationFunctions.create_hosts2(0, num_dest_hosts, None, seed)
+        source_hosts = SimulationFunctions.create_hosts2(num_dest_hosts, num_source_hosts, None, seed)
         hosts = source_hosts + dest_hosts
 
-        #adding dest pool
-        SimulationFunctions.dest_pool(source_hosts,dest_hosts)  # updating the dest pool for every source
+        # adding dest pool
+        SimulationFunctions.dest_pool(source_hosts, dest_hosts)  # updating the dest pool for every source
         # Creating links
         links = []
         switch_links = []
@@ -77,8 +77,8 @@ class PartA:
         switches = [switch]
         all_components = hosts + switches
 
-        #print(f"number of hosts connected to switch0: {source_hosts}")
-        #print(f"number of hosts connected to switch1: {dest_hosts}")
+        # print(f"number of hosts connected to switch0: {source_hosts}")
+        # print(f"number of hosts connected to switch1: {dest_hosts}")
 
         # start simulation
         all_l2messages = []
@@ -139,7 +139,7 @@ class PartA:
         if mac_table_log_file is not None:
             mac_table_log_file.close()
 
-        #statsitcs:
+        # Statistics:
         if printing_flag == 1:
             switch.print_statistics()
 
