@@ -38,7 +38,7 @@ class PartA:
         tx_rate = 1e2
         propagation = 0
 
-        scheduling_disciplines = ["FIFO", "Priority"]  # ["FIFO", "Priority", "PGPS"] # TODO: change
+        scheduling_disciplines = ["FIFO", "Priority", "PGPS"] # TODO: change
         all_finishing_times = []
         all_flow1_times = []
         all_flow2_times = []
@@ -165,11 +165,11 @@ class PartA:
         # Out of the loop
         fifo_times = all_finishing_times[0]
         priority_times = all_finishing_times[1]
-        # pgps_times = all_finishing_times[2] # TODO: change
+        pgps_times = all_finishing_times[2] # TODO: change
         plt.figure(figsize=(10, 6))
         plt.plot(fifo_times, label='FIFO', marker='o', linestyle='-')
         plt.plot(priority_times, label='Priority', marker='x', linestyle='--')
-        # plt.plot(pgps_times, label='PGPS', marker='s', linestyle='-.') # TODO: change
+        plt.plot(pgps_times, label='PGPS', marker='s', linestyle='-.') # TODO: change
         plt.xlabel('Message Index')
         plt.ylabel('Finishing Time')
         plt.title('Finishing Times under Different Scheduling Disciplines')
@@ -181,11 +181,11 @@ class PartA:
         for i in range(3):
             fifo_times = all_flows[i][0]
             priority_times = all_flows[i][1]
-            # pgps_times = all_flows[i][2] # TODO: change
+            pgps_times = all_flows[i][2] # TODO: change
             plt.figure(figsize=(10, 6))
             plt.plot(fifo_times, label='FIFO', marker='o', linestyle='-')
             plt.plot(priority_times, label='Priority', marker='x', linestyle='--')
-            # plt.plot(pgps_times, label='PGPS', marker='s', linestyle='-.') # TODO: change
+            plt.plot(pgps_times, label='PGPS', marker='s', linestyle='-.') # TODO: change
             plt.xlabel('Message Index')
             plt.ylabel('Finishing Time')
             plt.title(f'Finishing Times of Flow {i + 1} under Different Scheduling Disciplines')

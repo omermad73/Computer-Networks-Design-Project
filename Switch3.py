@@ -112,7 +112,7 @@ class SwitchLab3(SwitchLab2):
         time = current_time + link.transmit_delay(next_message)  # calculation of arrival time
         # = time of sending
         self.port_is_blocked[queue_num] = next_message.id
-        event = Event(time, "transmitted", self.id, None, None, queue_num)
+        event = Event(time, "transmitted", self.id, None, next_message.id, queue_num)
 
         timeline.add_event(event)
         if printing_flag == 1:
@@ -154,7 +154,7 @@ class SwitchLab3(SwitchLab2):
         time = current_time + link.transmit_delay(next_message)  # calculation of arrival time
         # = time of sending
         self.port_is_blocked[dest_port] = True
-        event = Event(time, "transmitted", self.id, None, None, dest_port)
+        event = Event(time, "transmitted", self.id, None, next_message.id, dest_port)
         timeline.add_event(event)
         if printing_flag == 1:
             print(f"Switch: {self.id} \033[36msending\033[0m the message (size: {next_message.message_size}) to"
@@ -229,10 +229,30 @@ class SwitchLab3(SwitchLab2):
         self.push_priority(dest_port, l2_message)
         if self.port_is_blocked[dest_port] is False:
             # If the port is not blocked, the switch will send the message
-            self.first_message_priority(timeline, dest_port, all_l2messages, printing_flag)
+            self.first_message_pgps(timeline, dest_port, all_l2messages, printing_flag)
 
     def delete_tuple_by_l2(self,queue_num,l2_message):
         for tuple in self.queues[queue_num]:
             if tuple[2] == l2_message:
                 self.queues[queue_num].remove(tuple)
         return
+
+    def first_message_pgps(self, timeline, queue_num, all_l2messages, printing_flag):
+        current_time = timeline.events[0].scheduled_time
+        # receive the message to send
+        next_message = self.queues[queue_num][0][2]
+        if next_message is None:
+            return
+        self.delete_tuple_by_l2(queue_num, next_message)
+        dest_port = queue_num
+        link = self.ports[queue_num]
+        time = current_time + link.transmit_delay(next_message)  # calculation of arrival time
+        # = time of sending
+        self.port_is_blocked[queue_num] = next_message.id
+        event = Event(time, "transmitted", self.id, None, next_message.id, queue_num)
+
+        timeline.add_event(event)
+        if printing_flag == 1:
+            print(f"Switch: {self.id} \033[36msending\033[0m the message (size: {next_message.message_size}) "
+                  f"from {next_message.src_mac} to port {dest_port} at time: {current_time:.6f}")
+        self.send_message(timeline, dest_port, next_message, all_l2messages)
