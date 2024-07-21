@@ -79,11 +79,11 @@ class SimulationFunctions():
         return hosts
 
     @staticmethod
-    def create_hosts2(starting_index, num_hosts, dest_hosts=None,seed=42):
+    def create_hosts2(starting_index, num_hosts, dest_hosts=None, seed=42):
         hosts = []
         for i in range(starting_index + 1, starting_index + num_hosts + 1):
             mac_address = f"00:00:00:00:00:{i:02d}"  # Format the MAC address
-            host2 = Host2(mac_address,dest_hosts,seed)
+            host2 = Host2(mac_address, dest_hosts, seed)
             hosts.append(host2)
         return hosts
 
